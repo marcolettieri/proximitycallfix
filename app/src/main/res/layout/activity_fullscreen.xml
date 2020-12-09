@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2196F3"
+    android:layout_gravity="center_vertical"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".FullscreenActivity">
+
+    <ImageView
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/icon"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/appico"/>
+    <TextView
+        android:id="@+id/fullscreen_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_below="@id/icon"
+
+        android:layout_centerVertical="true"
+        android:text="@string/dummy_content"
+        android:textColor="#FFFFFF"
+        android:textSize="35sp"
+        android:layout_marginRight="30dp"
+        android:layout_marginLeft="30dp"
+        android:textStyle="bold" />
+
+    <ImageButton
+        android:visibility="gone"
+        android:id="@+id/dummy_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fullscreen_content"
+        android:layout_marginTop="35dp"
+
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:background="@drawable/round_corner"
+        android:padding="20dp"
+        android:src="@drawable/ic_lock_open_black_24dp"
+        android:text="@string/dummy_button"
+        android:textColor="#FFFFFF" />
+<!--    <com.stfalcon.swipeablebutton.SwipeableButton
+        android:layout_width="150dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/fullscreen_content"
+        android:layout_marginTop="35dp"
+        android:id="@+id/unlock"
+        android:layout_height="wrap_content"
+        app:checkedIcon="@drawable/ic_lock_open_black_24dp"
+        app:durationAnimation="250"
+        app:isClickToSwipeEnable="false"
+        app:thresholdEnd="0.3"
+        app:thresholdStart="0.7"
+        app:textChecked=""
+        app:textUnchecked=""
+        app:textColorChecked="@android:color/white"
+        app:textColorUnChecked="@android:color/white"
+        app:checkedToggleBackground="@drawable/round_corner_green"
+        app:uncheckedToggleBackground="@drawable/round_corner_red"
+        app:uncheckedIcon="@drawable/ic_lock_outline_black_24dp" />-->
+
+</RelativeLayout>

@@ -1,0 +1,1 @@
+simple fix for during call proximity sensor issues

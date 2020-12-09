@@ -1,0 +1,7 @@
+I created this app because my Xiaomi has some bugs during the call and with my face I close the call or mute the microphone accidentally.
+
+The application does nothing but lock the screen when the phone is brought close to the ear during a phone call.
+
+Some special permissions are needed to lock the screen. If the application does not remain active in the background, disable battery optimizations on the app settings.
+
+No ROOT required

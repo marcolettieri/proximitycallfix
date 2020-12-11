@@ -1,13 +1,16 @@
-package com.ml.proximitysensorfix;
+package com.ml.proximitysensorfix.receiver;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.util.Log;
+
+import com.ml.proximitysensorfix.service.ProximitySensorService;
 
 public class StartupReceiver extends BroadcastReceiver {
 
+    @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override
     public void onReceive(Context context, Intent intent) {
         try {

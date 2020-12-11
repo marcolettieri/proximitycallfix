@@ -1,4 +1,4 @@
-package com.ml.proximitysensorfix;
+package com.ml.proximitysensorfix.activity;
 
 import android.annotation.SuppressLint;
 import android.app.admin.DevicePolicyManager;
@@ -16,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,10 @@ import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.tasks.OnCompleteListener;
 import com.google.android.play.core.tasks.Task;
+import com.ml.proximitysensorfix.service.LockAccessibilityService;
+import com.ml.proximitysensorfix.service.ProximitySensorService;
+import com.ml.proximitysensorfix.R;
+import com.ml.proximitysensorfix.receiver.AdminReceiver;
 
 public class MainActivity extends AppCompatActivity {
     private static boolean isIntentResolved(Context ctx, Intent intent) {
@@ -63,10 +69,12 @@ public class MainActivity extends AppCompatActivity {
         Button button = findViewById(R.id.buttonPermission);
         final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        final   AccessibilityManager     accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean active = devicePolicyManager.isAdminActive(new ComponentName(MainActivity.this, AdminReceiver.class));
+                boolean active = accessibilityService.isEnabled() || devicePolicyManager.isAdminActive(new ComponentName(MainActivity.this, AdminReceiver.class));
                 if (!active) {
                     startActivity(new Intent(MainActivity.this, PermissionsActivity.class));
                 } else {
@@ -93,66 +101,17 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        boolean active = devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
+        boolean active = accessibilityService.isEnabled()|| devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
 
         if (active) {
-
             startService(this);
         }
-        /*   if(!prefs.getBoolean("autostart",false) && isMIUI(MainActivity.this)||Build.BRAND.equalsIgnoreCase("Letv")||Build.BRAND.equalsIgnoreCase("Honor")){
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-
-                // set title
-                alertDialogBuilder.setTitle(R.string.enable_avvio_automatico);
-
-                // set dialog message
-                alertDialogBuilder
-                        .setMessage(R.string.enable_avvio_automatico_description)
-                        .setCancelable(false)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if(Build.BRAND.equalsIgnoreCase("xiaomi") ||isMIUI(MainActivity.this)){
-
-                                    Intent intent = new Intent();
-                                    intent.setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"));
-                                    startActivityForResult(intent,2);
-
-                                }else if(Build.BRAND.equalsIgnoreCase("Letv")){
-                                    Intent intent = new Intent();
-                                    intent.setComponent(new ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity"));
-                                    startActivityForResult(intent,2);
-
-                                }
-                                else if(Build.BRAND.equalsIgnoreCase("Honor")){
-                                    Intent intent = new Intent();
-                                    intent.setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"));
-                                    startActivityForResult(intent,2);
-                                }
-
-                            }
-                        })
-                        .setNegativeButton("I've already done", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getApplicationContext().checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Permission has not been granted, therefore prompt the user to grant permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_PHONE_STATE},
-                        0);
-            }
-        }*/
-
+        AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
+        event.setPackageName(getApplicationContext().getPackageName());
+        event.setEnabled(true);
+        event.setClassName(LockAccessibilityService.class.getName());
+        event.getText().add(getString(R.string.accessibility_service_text));
+        accessibilityService.sendAccessibilityEvent(event);
     }
 
     public static void startService(Context context) {

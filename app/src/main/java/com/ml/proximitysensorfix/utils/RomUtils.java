@@ -1,4 +1,4 @@
-package com.ml.proximitysensorfix;
+package com.ml.proximitysensorfix.utils;
 
 import android.os.Build;
 import android.text.TextUtils;

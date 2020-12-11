@@ -1,12 +1,14 @@
-package com.ml.proximitysensorfix;
+package com.ml.proximitysensorfix.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import com.ml.proximitysensorfix.service.ProximitySensorService;
+import com.ml.proximitysensorfix.R;
+import com.ml.proximitysensorfix.fragment.StepFragment;
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
@@ -17,18 +19,15 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 public class PermissionsActivity extends AppCompatActivity implements StepperLayout.StepperListener {
     final static String CURRENT_STEP_POSITION_KEY = "position";
 
-    class MyStepperAdapter extends AbstractFragmentStepAdapter {
+    static class MyStepperAdapter extends AbstractFragmentStepAdapter {
 
         public MyStepperAdapter(FragmentManager fm, Context context) {
             super(fm, context);
@@ -57,6 +56,7 @@ public class PermissionsActivity extends AppCompatActivity implements StepperLay
                     .create();
         }
     }
+    @SuppressLint("StaticFieldLeak")
     static StepperLayout mStepperLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +64,10 @@ public class PermissionsActivity extends AppCompatActivity implements StepperLay
         setContentView(R.layout.activity_permissions);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
+        if(getSupportActionBar()!=null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
         mStepperLayout =  findViewById(R.id.stepperLayout);
         mStepperLayout.setAdapter(new MyStepperAdapter(getSupportFragmentManager(), this));
         mStepperLayout.setListener(this);
@@ -98,12 +99,8 @@ public class PermissionsActivity extends AppCompatActivity implements StepperLay
 
     @Override
     public void onStepSelected(int newStepPosition) {
-        //Toast.makeText(this, "onStepSelected! -> " + newStepPosition, Toast.LENGTH_SHORT).show();
     }
 
-    public static void nextPermission(boolean nextOK){
-        mStepperLayout.setNextButtonEnabled(nextOK);
-    }
     public static void goNext(){
         mStepperLayout.proceed();
     }

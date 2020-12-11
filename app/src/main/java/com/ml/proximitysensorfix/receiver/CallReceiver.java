@@ -1,16 +1,10 @@
-package com.ml.proximitysensorfix;
+package com.ml.proximitysensorfix.receiver;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.telephony.TelephonyManager;
-import android.util.Log;
-
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class CallReceiver extends BroadcastReceiver {
 

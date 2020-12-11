@@ -1,4 +1,4 @@
-package com.ml.proximitysensorfix;
+package com.ml.proximitysensorfix.service;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -19,10 +19,17 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+
+import com.ml.proximitysensorfix.R;
+import com.ml.proximitysensorfix.activity.MainActivity;
+import com.ml.proximitysensorfix.receiver.AdminReceiver;
+import com.ml.proximitysensorfix.receiver.StartupReceiver;
 
 public class ProximitySensorService extends Service implements SensorEventListener {
 
@@ -47,7 +54,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
     AudioManager audioManager;
     DevicePolicyManager devicePolicyManager;
     SharedPreferences preferences;
-
+    AccessibilityManager accessibilityService;
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -85,6 +92,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
         //stopSelf();
         devicePolicyManager = (DevicePolicyManager)getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
         return START_STICKY;
     }
 
@@ -97,26 +105,37 @@ public class ProximitySensorService extends Service implements SensorEventListen
         return audioManager.getMode() == AudioManager.MODE_IN_CALL;
     }
 
-
+    private void lockNow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && accessibilityService.isEnabled()) {
+            AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
+            event.setPackageName(getApplicationContext().getPackageName());
+            event.setEnabled(true);
+            event.setClassName(LockAccessibilityService.class.getName());
+            event.getText().add(getString(R.string.accessibility_service_text));
+            accessibilityService.sendAccessibilityEvent(event);
+        } else {
+            devicePolicyManager.lockNow();
+        }
+    }
     @Override
     public void onSensorChanged(SensorEvent event) {
-        boolean active = devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
+        boolean active= accessibilityService.isEnabled() || devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
         if (active && isCallActive()) {
-            boolean isScreenAwake = (Build.VERSION.SDK_INT < 20? powerManager.isScreenOn():powerManager.isInteractive());
-            if (isScreenAwake) {
-                if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-                    if (event.values[0] == 0) {
-                        Log.d("ACTIVE", "PROXIMITY DETECTED");
-                        devicePolicyManager.lockNow();
-                    } else if (preferences.getBoolean("lightEnabled",false)  && event.sensor.getType() == Sensor.TYPE_LIGHT) {
-                        Log.d("ACTIVE LIGHT", ""+event.values[0]);
-                        if (event.values[0] <preferences.getInt("lightLevel",10)) {
-                            devicePolicyManager.lockNow();
+                boolean isScreenAwake = (Build.VERSION.SDK_INT < 20? powerManager.isScreenOn():powerManager.isInteractive());
+                if (isScreenAwake) {
+                    if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+                        if (event.values[0] == 0) {
+                            Log.d("ACTIVE", "PROXIMITY DETECTED");
+                            lockNow();
+                        } else if (preferences.getBoolean("lightEnabled",false)  && event.sensor.getType() == Sensor.TYPE_LIGHT) {
+                            Log.d("ACTIVE LIGHT", ""+event.values[0]);
+                            if (event.values[0] <preferences.getInt("lightLevel",10)) {
+                                lockNow();
+                            }
                         }
                     }
                 }
-            }
-    }
+        }
         /*if (true || isCallActive()) {
 
             if (event.values[0] == 0) {

@@ -1,22 +1,15 @@
-package com.ml.proximitysensorfix;
-
-import android.annotation.SuppressLint;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+package com.ml.proximitysensorfix.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Vibrator;
-import android.view.HapticFeedbackConstants;
-import android.view.MotionEvent;
-import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.ml.proximitysensorfix.R;
 
 
 /**

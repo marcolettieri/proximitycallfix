@@ -42,4 +42,6 @@
     <string name="uninstall_app_description">To uninstall the app you have to remove Administration Permission before</string>
     <string name="retry">Retry</string>
     <string name="disable_battery_optimization">Disable MIUI battery optimization to prevent the app is closed from OS</string>
+    <string name="accessibility_service_text" translatable="false">WaveUp Lock Command</string>
+    <string name="accesibilty_description" >This app need accessibility permission to block screen during call</string>
 </resources>

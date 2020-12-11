@@ -7,7 +7,7 @@
     android:layout_gravity="center_vertical"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".FullscreenActivity">
+    tools:context=".activity.FullscreenActivity">
 
     <ImageView
         android:layout_width="160dp"

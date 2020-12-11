@@ -3,20 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    signingConfigs {
-        debug {
-            storeFile file('/Users/microbeesdev/Desktop/personale/ProximitySensorFix/cert')
-            storePassword 'M1cr0b335'
-            keyAlias 'proximitysensorfix'
-            keyPassword 'M1cr0b335'
-        }
-        release {
-            storeFile file('/Users/microbeesdev/Desktop/personale/ProximitySensorFix/cert')
-            storePassword 'M1cr0b335'
-            keyAlias 'proximitysensorfix'
-            keyPassword 'M1cr0b335'
-        }
-    }
     compileSdkVersion 30
 
 
@@ -35,7 +21,6 @@ android {
             minifyEnabled false
             debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
             multiDexEnabled true
         }
     }

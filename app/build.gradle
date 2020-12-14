@@ -10,8 +10,8 @@ android {
         applicationId "com.ml.proximitysensorfix"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 20
-        versionName "1.0"
+        versionCode 22
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -19,7 +19,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            debuggable true
+            //debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             multiDexEnabled true
         }

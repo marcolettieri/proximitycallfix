@@ -12,7 +12,7 @@ import com.ml.proximitysensorfix.R;
 public class LockAccessibilityService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED &&
+        if (event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED && event.getText().size()>0 &&
                 event.getText().get(0).equals(getString(R.string.accessibility_service_text))) {
             lockDevice();
         }

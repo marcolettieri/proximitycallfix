@@ -106,12 +106,6 @@ public class MainActivity extends AppCompatActivity {
         if (active) {
             startService(this);
         }
-        AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
-        event.setPackageName(getApplicationContext().getPackageName());
-        event.setEnabled(true);
-        event.setClassName(LockAccessibilityService.class.getName());
-        event.getText().add(getString(R.string.accessibility_service_text));
-        accessibilityService.sendAccessibilityEvent(event);
     }
 
     public static void startService(Context context) {

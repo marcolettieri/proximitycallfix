@@ -36,4 +36,5 @@ local.properties
 ehthumbs.db
 Thumbs.db
 cert
-keystore.properties
+./keystore.properties
+

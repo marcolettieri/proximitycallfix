@@ -49,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     SharedPreferences prefs;
-
+    DevicePolicyManager devicePolicyManager;
+    AccessibilityManager     accessibilityService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         Button button = findViewById(R.id.buttonPermission);
-        final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(
+        devicePolicyManager = (DevicePolicyManager) getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        final   AccessibilityManager     accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+        accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,11 +80,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this, PermissionsActivity.class));
                 } else {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-
-                    // set title
                     alertDialogBuilder.setTitle(R.string.permission_gived);
-
-                    // set dialog message
                     alertDialogBuilder
                             .setCancelable(false)
                             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -105,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (active) {
             startService(this);
+            askForReview();
         }
     }
 
@@ -120,9 +118,66 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.home, menu);
+        if(!devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class)))
+            menu.findItem(R.id.uninstall).setVisible(false);
         return true;
     }
 
+    private void askForReview(){
+        try {
+            if(System.currentTimeMillis()-prefs.getLong("lastAskReview",0L)>(7*24*60*60*1000)) {
+                prefs.edit().putLong("lastAskReview", System.currentTimeMillis()).apply();
+                final ReviewManager manager = ReviewManagerFactory.create(this);
+                Task<ReviewInfo> request = manager.requestReviewFlow();
+                request.addOnCompleteListener(new OnCompleteListener<ReviewInfo>() {
+                    @Override
+                    public void onComplete(@NonNull Task<ReviewInfo> task) {
+                        try {
+                            if (task.isSuccessful()) {
+                                // We can get the ReviewInfo object
+                                ReviewInfo reviewInfo = task.getResult();
+                                Task<Void> flow = manager.launchReviewFlow(MainActivity.this, reviewInfo);
+                                flow.addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                                                    // set title
+                                                    alertDialogBuilder.setTitle("Thanks!!!");
+                                                    // set dialog message
+                                                    alertDialogBuilder
+                                                            .setCancelable(false)
+                                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+
+                                                                }
+                                                            });
+                                                    alertDialogBuilder.show();
+                                                } catch (Exception ignored) {
+
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                if (task.getException() != null)
+                                    task.getException().printStackTrace();
+                                OpenAppInPlayStore();
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }catch (Exception ignored){
+            OpenAppInPlayStore();
+        }
+    }
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -131,54 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.review) {
-            final ReviewManager manager = ReviewManagerFactory.create(this);
-            Task<ReviewInfo> request = manager.requestReviewFlow();
-            request.addOnCompleteListener(new OnCompleteListener<ReviewInfo>() {
-                @Override
-                public void onComplete(@NonNull Task<ReviewInfo> task) {
-                    try {
-                        if (task.isSuccessful()) {
-                            // We can get the ReviewInfo object
-                            ReviewInfo reviewInfo = task.getResult();
-                            Task<Void> flow = manager.launchReviewFlow(MainActivity.this, reviewInfo);
-
-
-                            flow.addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                                                // set title
-                                                alertDialogBuilder.setTitle("Thanks!!!");
-                                                // set dialog message
-                                                alertDialogBuilder
-                                                        .setCancelable(false)
-                                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-
-                                                            }
-                                                        });
-                                                alertDialogBuilder.show();
-                                            } catch (Exception ignored) {
-
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            if(task.getException()!=null)
-                            task.getException().printStackTrace();
-                            OpenAppInPlayStore();
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
+            askForReview();
 
             return true;
         }

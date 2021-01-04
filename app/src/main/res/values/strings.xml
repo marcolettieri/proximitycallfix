@@ -44,4 +44,5 @@
     <string name="disable_battery_optimization">Disable MIUI battery optimization to prevent the app is closed from OS</string>
     <string name="accessibility_service_text" translatable="false">WaveUp Lock Command</string>
     <string name="accesibilty_description" >This app need accessibility permission to block screen during call, select ProximitySensorFix from the list and enable Accessibility features</string>
+    <string name="annulla">Not Now</string>
 </resources>

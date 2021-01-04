@@ -10,9 +10,7 @@ android {
     signingConfigs {
         config {
             storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
             keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
         }
     }
     compileSdkVersion 30
@@ -22,8 +20,8 @@ android {
         applicationId "com.ml.proximitysensorfix"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 24
-        versionName "1.0.2"
+        versionCode 26
+        versionName "1.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
@@ -42,7 +40,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.2.1'
@@ -50,8 +47,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.3.2'
     implementation 'androidx.navigation:navigation-ui:2.3.2'
     implementation 'com.stepstone.stepper:material-stepper:4.3.1'
-    implementation 'com.google.android.play:core:1.9.0'
-    implementation 'com.google.android.play:core-ktx:1.8.1'
+    implementation 'com.github.judemanutd:autostarter:1.0.8'
 }
 repositories {
     mavenCentral()

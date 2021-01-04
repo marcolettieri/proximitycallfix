@@ -16,25 +16,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.play.core.tasks.OnCompleteListener;
-import com.google.android.play.core.tasks.Task;
-import com.ml.proximitysensorfix.service.LockAccessibilityService;
-import com.ml.proximitysensorfix.service.ProximitySensorService;
 import com.ml.proximitysensorfix.R;
 import com.ml.proximitysensorfix.receiver.AdminReceiver;
+import com.ml.proximitysensorfix.service.ProximitySensorService;
 
 public class MainActivity extends AppCompatActivity {
     private static boolean isIntentResolved(Context ctx, Intent intent) {
@@ -125,57 +117,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void askForReview(){
         try {
-            if(System.currentTimeMillis()-prefs.getLong("lastAskReview",0L)>(7*24*60*60*1000)) {
+            if(!prefs.getBoolean("hasReviewed",false) && System.currentTimeMillis()-prefs.getLong("lastAskReview",0L)>(7*24*60*60*1000)) {
                 prefs.edit().putLong("lastAskReview", System.currentTimeMillis()).apply();
-                final ReviewManager manager = ReviewManagerFactory.create(this);
-                Task<ReviewInfo> request = manager.requestReviewFlow();
-                request.addOnCompleteListener(new OnCompleteListener<ReviewInfo>() {
-                    @Override
-                    public void onComplete(@NonNull Task<ReviewInfo> task) {
-                        try {
-                            if (task.isSuccessful()) {
-                                // We can get the ReviewInfo object
-                                ReviewInfo reviewInfo = task.getResult();
-                                Task<Void> flow = manager.launchReviewFlow(MainActivity.this, reviewInfo);
-                                flow.addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                try {
-                                                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                                                    // set title
-                                                    alertDialogBuilder.setTitle("Thanks!!!");
-                                                    // set dialog message
-                                                    alertDialogBuilder
-                                                            .setCancelable(false)
-                                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                                                public void onClick(DialogInterface dialog, int id) {
-
-                                                                }
-                                                            });
-                                                    alertDialogBuilder.show();
-                                                } catch (Exception ignored) {
-
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                if (task.getException() != null)
-                                    task.getException().printStackTrace();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                alertDialogBuilder.setTitle(R.string.reviewApp);
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
                                 OpenAppInPlayStore();
+                                prefs.edit().putBoolean("hasReviewed", true).apply();
                             }
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
+                        }).setNeutralButton(R.string.annulla, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
                     }
                 });
+                alertDialogBuilder.show();
             }
         }catch (Exception ignored){
-            OpenAppInPlayStore();
+
         }
     }
     public boolean onOptionsItemSelected(MenuItem item) {

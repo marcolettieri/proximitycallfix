@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.judemanutd.autostarter.AutoStartPermissionHelper;
 import com.ml.proximitysensorfix.R;
 import com.ml.proximitysensorfix.utils.RomUtils;
 import com.ml.proximitysensorfix.activity.MainActivity;
@@ -106,7 +107,7 @@ public class StepFragment extends Fragment implements Step {
 
                             }
                         });
-                        } else {
+                    } else {
                         stepText.setText(R.string.admin_description);
                         stepButton.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -128,9 +129,10 @@ public class StepFragment extends Fragment implements Step {
                     stepButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-
                             try {
-                                if(Build.BRAND.equalsIgnoreCase("xiaomi") || MainActivity.isMIUI(getActivity())){
+                                if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(getActivity())){
+                                    AutoStartPermissionHelper.getInstance().getAutoStartPermission(getActivity());
+                                } else if(Build.BRAND.equalsIgnoreCase("xiaomi") || MainActivity.isMIUI(getActivity())){
                                     Intent intent = new Intent();
                                     intent.setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"));
                                     startActivityForResult(intent, 2);
@@ -163,22 +165,22 @@ public class StepFragment extends Fragment implements Step {
                     stepButton.setOnClickListener(new View.OnClickListener() {
                                                       @Override
                                                       public void onClick(View v) {
-                                                          try {
-                                                              if(getContext()!=null) {
-                                                                  Intent intent = new Intent();
-                                                                  intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                                                  Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
-                                                                  intent.setData(uri);
-                                                                  startActivity(intent);
-                                                              }
-                                                              verified=true;
-                                                              PermissionsActivity.goNext();
+                      try {
+                          if(getContext()!=null) {
+                              Intent intent = new Intent();
+                              intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                              Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                              intent.setData(uri);
+                              startActivity(intent);
+                          }
+                          verified=true;
+                          PermissionsActivity.goNext();
 
-                                                          } catch (Exception e) {
-                                                              e.printStackTrace();
-                                                              verified=true;
-                                                              PermissionsActivity.goNext();
-                                                          }
+                      } catch (Exception e) {
+                          e.printStackTrace();
+                          verified=true;
+                          PermissionsActivity.goNext();
+                      }
 
                                                       }
                                                   }

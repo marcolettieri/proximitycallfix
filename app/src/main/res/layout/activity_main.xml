@@ -69,6 +69,7 @@
 
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
+            android:textSize="12sp"
             android:text="@string/use_also_the_light_sensor_description"
             android:layout_height="wrap_content"/>
         <androidx.appcompat.widget.AppCompatCheckBox
@@ -78,11 +79,18 @@
             android:layout_height="wrap_content"/>
         <TextView
             android:layout_width="match_parent"
-            android:textAlignment="center"
-
+            android:textSize="12sp"
+            android:id="@+id/disclaimerAdmin"
             android:layout_gravity="center"
-            android:layout_marginTop="15dp"
-            android:text="@string/if_you_don_t_want_the_notification_fixed_in_status_bar_long_press_on_it_and_disable_the_notification_the_app_will_continue_work"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            android:text="@string/use_admin_disclaimer"
+            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:layout_width="match_parent"
+            android:id="@+id/use_admin"
+            android:visibility="gone"
+            android:text="@string/use_admin"
             android:layout_height="wrap_content"/>
 
 

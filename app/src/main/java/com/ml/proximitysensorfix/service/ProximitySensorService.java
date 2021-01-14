@@ -106,15 +106,15 @@ public class ProximitySensorService extends Service implements SensorEventListen
     }
 
     private void lockNow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && accessibilityService.isEnabled()) {
+        if (preferences.getBoolean("adminEnabled",true)&&devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class))) {
+            devicePolicyManager.lockNow();
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && accessibilityService.isEnabled()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
             event.setPackageName(getApplicationContext().getPackageName());
             event.setEnabled(true);
             event.setClassName(LockAccessibilityService.class.getName());
             event.getText().add(getString(R.string.accessibility_service_text));
             accessibilityService.sendAccessibilityEvent(event);
-        } else if(devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class))){
-            devicePolicyManager.lockNow();
         }
     }
     @Override

@@ -45,4 +45,6 @@
     <string name="accessibility_service_text" translatable="false">WaveUp Lock Command</string>
     <string name="accesibilty_description" >This app need accessibility permission to block screen during call, select ProximitySensorFix from the list and enable Accessibility features</string>
     <string name="annulla">Not Now</string>
+    <string name="use_admin">Use Administration mode instead of Accessibility</string>
+    <string name="use_admin_disclaimer">Some devices works better with Administration mode and others can\'t unlock screen with fingerprint</string>
 </resources>

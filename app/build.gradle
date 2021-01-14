@@ -9,8 +9,11 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
     signingConfigs {
         config {
-            storeFile file(keystoreProperties['storeFile'])
-            keyAlias keystoreProperties['keyAlias']
+            storeFile keystoreProperties["storeFile"]
+            keyAlias keystoreProperties["alias"]
+            keyPassword keystoreProperties["storePassword"]
+            storePassword keystoreProperties["storePassword"]
+
         }
     }
     compileSdkVersion 30
@@ -20,8 +23,8 @@ android {
         applicationId "com.ml.proximitysensorfix"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 26
-        versionName "1.0.4"
+        versionCode 27
+        versionName "1.0.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config

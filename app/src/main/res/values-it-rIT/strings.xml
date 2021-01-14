@@ -28,4 +28,6 @@
     <string name="disable_battery_optimization">Disabilita le ottimizzazioni della batteria per evitare che il sistema operativo chiuda l\'app in background</string>
     <string name="accesibilty_description">Questa app necessita dell\'autorizzazione all\'accessibilità per bloccare lo schermo durante la chiamata, scegli ProximitySensorFix dall\'elenco e abilita le funzionalità di Accessibilità</string>
     <string name="annulla">Annulla</string>
+    <string name="use_admin">Usa la modalità Amministratore invece della sola Accessibilità</string>
+    <string name="use_admin_disclaimer">Su alcuni dispositivi funziona meglio la modalità Amministratore mentre su altri non permette di sbloccare con l\'impronta</string>
 </resources>

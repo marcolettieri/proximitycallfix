@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,13 +53,29 @@ public class MainActivity extends AppCompatActivity {
         prefs = getSharedPreferences("data", MODE_PRIVATE);
         final AppCompatCheckBox useLight = findViewById(R.id.use_light);
         useLight.setChecked(prefs.getBoolean("lightEnabled", false));
-        useLight.setOnClickListener(new View.OnClickListener() {
+        useLight.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 prefs.edit().putBoolean("lightEnabled", useLight.isChecked()).apply();
                 startService(MainActivity.this);
             }
         });
+        final AppCompatCheckBox useAdmin = findViewById(R.id.use_admin);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+            useAdmin.setVisibility(View.GONE);
+            findViewById(R.id.disclaimerAdmin).setVisibility(View.GONE);
+        }else {
+            useAdmin.setVisibility(View.VISIBLE);
+            findViewById(R.id.disclaimerAdmin).setVisibility(View.VISIBLE);
+            useAdmin.setChecked(prefs.getBoolean("adminEnabled", false));
+            useAdmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    prefs.edit().putBoolean("adminEnabled", useAdmin.isChecked()).apply();
+                    startActivity(new Intent(MainActivity.this, PermissionsActivity.class));
+                }
+            });
+        }
         Button button = findViewById(R.id.buttonPermission);
         devicePolicyManager = (DevicePolicyManager) getSystemService(
                 Context.DEVICE_POLICY_SERVICE);

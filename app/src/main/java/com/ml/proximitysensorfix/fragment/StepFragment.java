@@ -6,6 +6,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -45,9 +46,12 @@ public class StepFragment extends Fragment implements Step {
     TextView stepText;
     Button stepButton;
     static boolean verified = false;
+    SharedPreferences prefs;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(getActivity()!=null)
+        prefs = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
 
     }
     protected void didVisibilityChange() {
@@ -96,18 +100,7 @@ public class StepFragment extends Fragment implements Step {
             switch(position){
                 case 0 : {
                     stepButton.setText(R.string.concedi_permesso);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        stepText.setText(R.string.accesibilty_description);
-                        stepButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivityForResult(intent,0);
-
-                            }
-                        });
-                    } else {
+                    if((prefs!=null && prefs.getBoolean("adminEnabled", false)) ||Build.VERSION.SDK_INT < Build.VERSION_CODES.P ){
                         stepText.setText(R.string.admin_description);
                         stepButton.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -118,6 +111,17 @@ public class StepFragment extends Fragment implements Step {
                                     intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_description));
                                     startActivityForResult(intent, 0);
                                 }
+                            }
+                        });
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        stepText.setText(R.string.accesibilty_description);
+                        stepButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivityForResult(intent,0);
+
                             }
                         });
                     }
@@ -146,12 +150,27 @@ public class StepFragment extends Fragment implements Step {
                                     Intent intent = new Intent();
                                     intent.setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"));
                                     startActivityForResult(intent,2);
-                                }
+                                } else {
+                                    if(getContext()!=null) {
+                                        Intent intent = new Intent();
+                                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                        intent.setData(uri);
+                                        startActivity(intent);
+                                    }
                                     verified=true;
                                     PermissionsActivity.goNext();
+                                }
 
 
                             }catch (Exception e){
+                                if(getContext()!=null) {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                    intent.setData(uri);
+                                    startActivity(intent);
+                                }
                                 verified=true;
                                 PermissionsActivity.goNext();
                             }

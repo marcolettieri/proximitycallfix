@@ -1,6 +1,7 @@
 package com.ml.proximitysensorfix.service;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -24,9 +25,16 @@ public class LockAccessibilityService extends AccessibilityService {
     }
     @Override
     protected void onServiceConnected() {
-        // TODO Auto-generated method stub
         super.onServiceConnected();
         Log.i("Service", "Connected");
+        try{
+            Intent service = new Intent(getApplicationContext(), ProximitySensorService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                getApplicationContext().startForegroundService(service);
+            } else {
+                getApplicationContext().startService(service);
+            }
+        }catch (Exception ignored){}
     }
     @Override
     public void onInterrupt() {

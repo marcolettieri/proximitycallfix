@@ -102,7 +102,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
         return null;
     }
     public boolean isCallActive(){
-        return audioManager.getMode() == AudioManager.MODE_IN_CALL;
+        return audioManager.getMode() == AudioManager.MODE_IN_CALL && !audioManager.isSpeakerphoneOn();
     }
 
     private void lockNow() {
@@ -161,9 +161,11 @@ public class ProximitySensorService extends Service implements SensorEventListen
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i("EXIT", "ondestroy!");
-        if(sm!=null)
-            sm.unregisterListener(this);
+        try {
+            Log.i("EXIT", "ondestroy!");
+            if (sm != null)
+                sm.unregisterListener(this);
+        }catch (Exception ignored){}
         Intent broadcastIntent = new Intent(this, StartupReceiver.class);
         sendBroadcast(broadcastIntent);
     }

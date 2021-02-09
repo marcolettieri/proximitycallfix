@@ -18,7 +18,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,6 @@ import android.widget.TextView;
 
 import com.judemanutd.autostarter.AutoStartPermissionHelper;
 import com.ml.proximitysensorfix.R;
-import com.ml.proximitysensorfix.utils.RomUtils;
 import com.ml.proximitysensorfix.activity.MainActivity;
 import com.ml.proximitysensorfix.activity.PermissionsActivity;
 import com.ml.proximitysensorfix.receiver.AdminReceiver;
@@ -55,21 +53,17 @@ public class StepFragment extends Fragment implements Step {
 
     }
     protected void didVisibilityChange() {
-        Activity activity = getActivity();
         if (isResumed()) {
             int position= getArguments().getInt("position",0);
             if(position>0 && getActivity()!=null)
                 getActivity().setTitle("Step "+(position+1));
-            switch(position) {
-                case 0: {
-                    final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
-                            Context.DEVICE_POLICY_SERVICE);
-                    final AccessibilityManager accessibilityService = (AccessibilityManager) getActivity().getSystemService(Context.ACCESSIBILITY_SERVICE);
-                    if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && accessibilityService.isEnabled()) ||
-                            (Build.VERSION.SDK_INT < Build.VERSION_CODES.P && devicePolicyManager.isAdminActive(new ComponentName(getActivity(), AdminReceiver.class)))) {
-                        verified=true;
-                    }
-                    break;
+            if (position == 0) {
+                final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getActivity().getSystemService(
+                        Context.DEVICE_POLICY_SERVICE);
+                final AccessibilityManager accessibilityService = (AccessibilityManager) getActivity().getSystemService(Context.ACCESSIBILITY_SERVICE);
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && accessibilityService.isEnabled()) ||
+                        (Build.VERSION.SDK_INT < Build.VERSION_CODES.P && devicePolicyManager.isAdminActive(new ComponentName(getActivity(), AdminReceiver.class)))) {
+                    verified = true;
                 }
             }
         }
@@ -237,94 +231,7 @@ public class StepFragment extends Fragment implements Step {
         return view;
     }
 
-    public void applyMiuiPermission(Context context) {
-        if(RomUtils.checkIsMiuiRom()) {
-            int versionCode = getMiuiVersion();
-            if (versionCode == 5) {
-                goToMiuiPermissionActivity_V5(context);
-            } else if (versionCode == 6) {
-                goToMiuiPermissionActivity_V6(context);
-            } else if (versionCode == 7) {
-                goToMiuiPermissionActivity_V7(context);
-            } else if (versionCode >= 8) {
-                goToMiuiPermissionActivity_V8(context);
-            } else {
-                Log.e("ERR", "this is a special MIUI rom version, its version code " + versionCode);
-            }
-        }
-        StepFragment.verified=true;
-        PermissionsActivity.goNext();
-    }
 
-
-    public static int getMiuiVersion() {
-        String version = RomUtils.getSystemProperty("ro.miui.ui.version.name");
-        if (version != null) {
-            try {
-                return Integer.parseInt(version.substring(1));
-            } catch (Exception e) {
-                Log.e("ERR", "get miui version code error, version : " + version);
-            }
-        }
-        return -1;
-    }
-
-    public static void goToMiuiPermissionActivity_V5(Context context) {
-        String packageName = context.getPackageName();
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package" , packageName, null);
-        intent.setData(uri);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (isIntentAvailable(intent, context)) {
-            context.startActivity(intent);
-        } else {
-            Log.e("ERR", "intent is not available!");
-        }
-    }
-
-    private static  boolean isIntentAvailable(Intent intent,Context context) {
-        if(context!=null)
-            return  context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0;
-        return false;
-    }
-
-    public static void goToMiuiPermissionActivity_V6(Context context) {
-        Intent intent = new Intent("miui.intent.action.APP_PERM_EDITOR");
-        intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
-        intent.putExtra("extra_pkgname", context.getPackageName());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        if (isIntentAvailable(intent, context)) {
-            context.startActivity(intent);
-        } else {
-            Log.e("ERR", "Intent is not available!");
-        }
-    }
-
-    public static void goToMiuiPermissionActivity_V8(Context context){
-        Intent intent = new Intent("miui.intent.action.APP_PERM_EDITOR");
-        intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.PermissionsEditorActivity");
-        intent.putExtra("extra_pkgname", context.getPackageName());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        if (isIntentAvailable(intent, context)) {
-            context.startActivity(intent);
-        } else {
-            Log.e("ERR", "Intent is not available!");
-        }
-    }
-    public static void goToMiuiPermissionActivity_V7(Context context) {
-        Intent intent = new Intent("miui.intent.action.APP_PERM_EDITOR");
-        intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
-        intent.putExtra("extra_pkgname", context.getPackageName());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        if (isIntentAvailable(intent, context)) {
-            context.startActivity(intent);
-        } else {
-            Log.e("ERR", "Intent is not available!");
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

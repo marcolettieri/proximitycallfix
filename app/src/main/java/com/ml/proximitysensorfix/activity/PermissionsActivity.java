@@ -102,7 +102,7 @@ public class PermissionsActivity extends AppCompatActivity implements StepperLay
     }
 
     public static void goNext(){
-        mStepperLayout.proceed();
+        try{mStepperLayout.proceed();}catch (Exception ignored){}
     }
 
     @Override

@@ -44,7 +44,6 @@ public class ProximitySensorService extends Service implements SensorEventListen
             );
             NotificationManager manager = getSystemService(NotificationManager.class);
             if(manager!=null) {
-                manager.deleteNotificationChannel(CHANNEL_ID);
                 manager.createNotificationChannel(serviceChannel);
             }
         }
@@ -75,8 +74,9 @@ public class ProximitySensorService extends Service implements SensorEventListen
             if (manager != null) {
                 manager.cancel(1);
             }
-        }catch (Exception ignored){}
         startForeground(1,notification);
+        }catch (Exception ignored){}
+
         sm=(SensorManager)getSystemService(SENSOR_SERVICE);
         Sensor proxSensor=sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         Sensor lightSensor= sm.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -102,7 +102,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
         return null;
     }
     public boolean isCallActive(){
-        return audioManager.getMode() == AudioManager.MODE_IN_CALL && !audioManager.isSpeakerphoneOn();
+        return (audioManager.getMode() == AudioManager.MODE_IN_CALL || audioManager.getMode() == AudioManager.MODE_IN_COMMUNICATION) && !audioManager.isSpeakerphoneOn();
     }
 
     private void lockNow() {

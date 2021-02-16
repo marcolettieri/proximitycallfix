@@ -1,19 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
   },
   "applicationId": "com.ml.proximitysensorfix",
-  "variantName": "release",
+  "variantName": "processReleaseResources",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
-      "properties": [],
-      "versionCode": 28,
-      "versionName": "1.0.6",
-      "enabled": true,
+      "versionCode": 29,
+      "versionName": "1.0.7",
       "outputFile": "app-release.apk"
     }
   ]

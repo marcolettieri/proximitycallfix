@@ -60,22 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 startService(MainActivity.this);
             }
         });
-        final AppCompatCheckBox useAdmin = findViewById(R.id.use_admin);
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
-            useAdmin.setVisibility(View.GONE);
-            findViewById(R.id.disclaimerAdmin).setVisibility(View.GONE);
-        }else {
-            useAdmin.setVisibility(View.VISIBLE);
-            findViewById(R.id.disclaimerAdmin).setVisibility(View.VISIBLE);
-            useAdmin.setChecked(prefs.getBoolean("adminEnabled", false));
-            useAdmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    prefs.edit().putBoolean("adminEnabled", useAdmin.isChecked()).apply();
-                    startActivity(new Intent(MainActivity.this, PermissionsActivity.class));
-                }
-            });
-        }
+
         Button button = findViewById(R.id.buttonPermission);
         devicePolicyManager = (DevicePolicyManager) getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
@@ -113,6 +98,41 @@ public class MainActivity extends AppCompatActivity {
             startService(this);
             askForReview();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final AppCompatCheckBox useAdmin = findViewById(R.id.use_admin);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+            useAdmin.setVisibility(View.GONE);
+            findViewById(R.id.disclaimerAdmin).setVisibility(View.GONE);
+        }else {
+            useAdmin.setVisibility(View.VISIBLE);
+            findViewById(R.id.disclaimerAdmin).setVisibility(View.VISIBLE);
+            useAdmin.setChecked(prefs.getBoolean("adminEnabled", false));
+        }
+        if(devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class))){
+            Button uninstall = findViewById(R.id.uninstallButton);
+            uninstall.setVisibility(View.VISIBLE);
+            uninstall.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent().setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings")));
+                }
+            });
+        } else {
+            findViewById(R.id.uninstallButton).setVisibility(View.GONE);
+            prefs.edit().putBoolean("adminEnabled", false).apply();
+            useAdmin.setChecked(prefs.getBoolean("adminEnabled", false));
+        }
+        useAdmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                prefs.edit().putBoolean("adminEnabled", useAdmin.isChecked()).apply();
+                startActivity(new Intent(MainActivity.this, PermissionsActivity.class));
+            }
+        });
     }
 
     public static void startService(Context context) {

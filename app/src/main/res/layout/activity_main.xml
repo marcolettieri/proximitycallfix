@@ -21,6 +21,9 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
@@ -92,8 +95,17 @@
             android:visibility="gone"
             android:text="@string/use_admin"
             android:layout_height="wrap_content"/>
-
+        <Button
+            android:layout_width="match_parent"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:id="@+id/uninstallButton"
+            android:background="@color/colorAccent"
+            android:textColor="@android:color/white"
+            android:visibility="gone"
+            android:text="@string/uninstall_app_description"
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
-
+    </ScrollView>
 </LinearLayout>

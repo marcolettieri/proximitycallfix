@@ -54,11 +54,24 @@ public class ProximitySensorService extends Service implements SensorEventListen
     DevicePolicyManager devicePolicyManager;
     SharedPreferences preferences;
     AccessibilityManager accessibilityService;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        preferences = getSharedPreferences("data",MODE_PRIVATE);
+        createNotificationChannel();
+        sm=(SensorManager)getSystemService(SENSOR_SERVICE);
+        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        //wakeLock = powerManager.newWakeLock(field, "AppName:myWakeLog");
+        audioManager=(AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+        //do heavy work on a background thread
+        //stopSelf();
+        devicePolicyManager = (DevicePolicyManager)getSystemService(Context.DEVICE_POLICY_SERVICE);
+        accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        createNotificationChannel();
-        preferences = getSharedPreferences("data",MODE_PRIVATE);
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
@@ -74,10 +87,13 @@ public class ProximitySensorService extends Service implements SensorEventListen
             if (manager != null) {
                 manager.cancel(1);
             }
-        startForeground(1,notification);
         }catch (Exception ignored){}
+        finally {
+            try {
+                startForeground(1, notification);
+            }catch (Exception ignored){}
+        }
 
-        sm=(SensorManager)getSystemService(SENSOR_SERVICE);
         Sensor proxSensor=sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         Sensor lightSensor= sm.getDefaultSensor(Sensor.TYPE_LIGHT);
         sm.registerListener(this, proxSensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -85,14 +101,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
             Log.d("ACTIVE LIGHT", "ENABLED");
             sm.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
-        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        //wakeLock = powerManager.newWakeLock(field, "AppName:myWakeLog");
-        audioManager=(AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
-        //do heavy work on a background thread
-        //stopSelf();
-        devicePolicyManager = (DevicePolicyManager)getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+
         return START_STICKY;
     }
 
@@ -119,22 +128,24 @@ public class ProximitySensorService extends Service implements SensorEventListen
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
-        boolean active= accessibilityService.isEnabled() || devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
-        if (active && isCallActive()) {
-                boolean isScreenAwake = (Build.VERSION.SDK_INT < 20? powerManager.isScreenOn():powerManager.isInteractive());
+        if(isCallActive()){
+            boolean active= accessibilityService.isEnabled() || devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
+            if (active) {
+                boolean isScreenAwake = (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn() : powerManager.isInteractive());
                 if (isScreenAwake) {
                     if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
                         if (event.values[0] == 0) {
                             Log.d("ACTIVE", "PROXIMITY DETECTED");
                             lockNow();
-                        } else if (preferences.getBoolean("lightEnabled",false)  && event.sensor.getType() == Sensor.TYPE_LIGHT) {
-                            Log.d("ACTIVE LIGHT", ""+event.values[0]);
-                            if (event.values[0] <preferences.getInt("lightLevel",10)) {
+                        } else if (preferences.getBoolean("lightEnabled", false) && event.sensor.getType() == Sensor.TYPE_LIGHT) {
+                            Log.d("ACTIVE LIGHT", "" + event.values[0]);
+                            if (event.values[0] < preferences.getInt("lightLevel", 10)) {
                                 lockNow();
                             }
                         }
                     }
                 }
+            }
         }
         /*if (true || isCallActive()) {
 
@@ -162,7 +173,6 @@ public class ProximitySensorService extends Service implements SensorEventListen
     public void onDestroy() {
         super.onDestroy();
         try {
-            Log.i("EXIT", "ondestroy!");
             if (sm != null)
                 sm.unregisterListener(this);
         }catch (Exception ignored){}

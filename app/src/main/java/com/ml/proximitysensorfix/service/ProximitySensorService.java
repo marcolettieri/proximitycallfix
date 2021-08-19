@@ -20,7 +20,6 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -56,16 +55,14 @@ public class ProximitySensorService extends Service implements SensorEventListen
     DevicePolicyManager devicePolicyManager;
     SharedPreferences preferences;
     AccessibilityManager accessibilityService;
-    Boolean locked = Boolean.FALSE;
     BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(sm!=null){
-                if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF) && locked) {
+                if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                     sm.unregisterListener(ProximitySensorService.this);
                 } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                     registerListeners();
-                    locked = Boolean.FALSE;
                 }
             }
         }
@@ -145,7 +142,6 @@ public class ProximitySensorService extends Service implements SensorEventListen
             event.getText().add(getString(R.string.accessibility_service_text));
             accessibilityService.sendAccessibilityEvent(event);
         }
-        locked = Boolean.TRUE;
         sm.unregisterListener(this);
     }
     @Override
@@ -164,27 +160,6 @@ public class ProximitySensorService extends Service implements SensorEventListen
                 }
             }
         }
-        /*if (true || isCallActive()) {
-
-            if (event.values[0] == 0) {
-
-                if (!wakeLock.isHeld()) {
-                    Log.d("APP", "BLOCK");
-                    wakeLock.acquire();
-                }
-
-            } else {
-                if (wakeLock.isHeld()) {
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Log.d("APP", "RELEASE");
-                    wakeLock.release();
-                }
-            }
-        }*/
     }
     @Override
     public void onDestroy() {

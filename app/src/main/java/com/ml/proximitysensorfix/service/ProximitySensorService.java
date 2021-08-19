@@ -6,9 +6,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -54,7 +56,28 @@ public class ProximitySensorService extends Service implements SensorEventListen
     DevicePolicyManager devicePolicyManager;
     SharedPreferences preferences;
     AccessibilityManager accessibilityService;
-
+    Boolean locked = Boolean.FALSE;
+    BroadcastReceiver screenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(sm!=null){
+                if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF) && locked) {
+                    sm.unregisterListener(ProximitySensorService.this);
+                } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                    registerListeners();
+                    locked = Boolean.FALSE;
+                }
+            }
+        }
+    };
+    private void registerListeners(){
+        Sensor proxSensor=sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        Sensor lightSensor= sm.getDefaultSensor(Sensor.TYPE_LIGHT);
+        sm.registerListener(this, proxSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        if (preferences.getBoolean("lightEnabled",false)) {
+            sm.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,6 +91,9 @@ public class ProximitySensorService extends Service implements SensorEventListen
         //stopSelf();
         devicePolicyManager = (DevicePolicyManager)getSystemService(Context.DEVICE_POLICY_SERVICE);
         accessibilityService = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(screenReceiver, filter);
     }
 
     @Override
@@ -93,15 +119,7 @@ public class ProximitySensorService extends Service implements SensorEventListen
                 startForeground(1, notification);
             }catch (Exception ignored){}
         }
-
-        Sensor proxSensor=sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        Sensor lightSensor= sm.getDefaultSensor(Sensor.TYPE_LIGHT);
-        sm.registerListener(this, proxSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        if (preferences.getBoolean("lightEnabled",false)) {
-            Log.d("ACTIVE LIGHT", "ENABLED");
-            sm.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        }
-
+        registerListeners();
         return START_STICKY;
     }
 
@@ -113,7 +131,9 @@ public class ProximitySensorService extends Service implements SensorEventListen
     public boolean isCallActive(){
         return (audioManager.getMode() == AudioManager.MODE_IN_CALL || audioManager.getMode() == AudioManager.MODE_IN_COMMUNICATION) && !audioManager.isSpeakerphoneOn();
     }
-
+    public boolean isScreenAwake(){
+        return (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn() : powerManager.isInteractive());
+    }
     private void lockNow() {
         if (preferences.getBoolean("adminEnabled",true)&&devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class))) {
             devicePolicyManager.lockNow();
@@ -125,23 +145,20 @@ public class ProximitySensorService extends Service implements SensorEventListen
             event.getText().add(getString(R.string.accessibility_service_text));
             accessibilityService.sendAccessibilityEvent(event);
         }
+        locked = Boolean.TRUE;
+        sm.unregisterListener(this);
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(isCallActive()){
+        if(isCallActive() && isScreenAwake()){
             boolean active= accessibilityService.isEnabled() || devicePolicyManager.isAdminActive(new ComponentName(this, AdminReceiver.class));
             if (active) {
-                boolean isScreenAwake = (Build.VERSION.SDK_INT < 20 ? powerManager.isScreenOn() : powerManager.isInteractive());
-                if (isScreenAwake) {
-                    if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-                        if (event.values[0] == 0) {
-                            Log.d("ACTIVE", "PROXIMITY DETECTED");
+                if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+                    if (event.values[0] == 0) {
+                        lockNow();
+                    } else if (preferences.getBoolean("lightEnabled", false) && event.sensor.getType() == Sensor.TYPE_LIGHT) {
+                        if (event.values[0] < preferences.getInt("lightLevel", 10)) {
                             lockNow();
-                        } else if (preferences.getBoolean("lightEnabled", false) && event.sensor.getType() == Sensor.TYPE_LIGHT) {
-                            Log.d("ACTIVE LIGHT", "" + event.values[0]);
-                            if (event.values[0] < preferences.getInt("lightLevel", 10)) {
-                                lockNow();
-                            }
                         }
                     }
                 }
